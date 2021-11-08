@@ -1,0 +1,40 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: db-cron1
+  namespace: t027-u000162
+spec:
+  schedule: "0 0 * * 5"
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: db-cron1
+              image: klstg-docker.slb-wartifactory-v.stg.rmn.local/sourcefuse/apponboard/stolon-backup:0.1
+              imagePullPolicy: IfNotPresent
+              env:
+              - name: db_list
+                value: 'katana_bundles;katana_auth;katana_artifactory;katana_workflow;katana_notif;katana_helm;process_engine_ha;katana_audit;katana_camunda'
+              - name: AWS_ACCESS_KEY_ID
+                value: 'AKIAIOSFODNN7EXAMPLE'
+              - name: AWS_SECRET_ACCESS_KEY
+                value: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+              - name: PG_PASS
+                value: 'password1'
+              - name: HOST
+                value: 'svconboard-infra-proxy-np-0'
+              - name: USER
+                value: 'postgres'
+              - name: S3_ENDPOINT
+                value: 'http://minio-minio-01-np-0:9000'
+              - name: S3_REGION
+                value: 'us-east-1'
+              - name: S3_BUCKET
+                value: 'katana-sandbox'
+              args:
+              - "/bin/bash"
+              - "-c"
+              - "cd /home/root; ls; bash katana-backup-script.sh"
+          restartPolicy: Never
